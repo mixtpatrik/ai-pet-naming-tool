@@ -10,12 +10,12 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   // State to store the generated names
   const [names, setNames] = useState([]);
-  // State for error messages
+  // State for error messages (less likely with static data, but kept for potential future use)
   const [error, setError] = useState(null);
 
   /**
    * Handles the form submission.
-   * Prevents default form behavior, sets loading state, calls API, and updates names.
+   * Prevents default form behavior, sets loading state, and updates names with static data.
    */
   const handleSubmit = useCallback(async (e) => {
     e.preventDefault(); // Prevent default form submission
@@ -24,35 +24,35 @@ export default function Home() {
     setError(null); // Clear previous errors
 
     try {
-      // Make a POST request to our Next.js API route
-      const response = await fetch('/api/generate-names', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        // Send the form data in the request body
-        body: JSON.stringify({ petType, description, nameStyle }),
-      });
+      // --- STATIC NAMES FOR TESTING (Moved from API route) ---
+      // This array will be returned directly by the frontend for GitHub Pages compatibility.
+      const staticNames = [
+        "1. Luna – A classic, gentle name perfect for a calm companion.",
+        "2. Sparky – A playful name for an energetic and mischievous pet.",
+        "3. Athena – A strong, wise name, great for a noble and intelligent animal.",
+        "4. Biscuit – A sweet, comforting name for a cuddly and lovable friend.",
+        "5. Rocket – Ideal for a fast, adventurous, or high-energy pet.",
+        "6. Shadow – A mysterious and cool name, often fitting for dark-furred pets.",
+        "7. Willow – A graceful, nature-inspired name for a serene and elegant animal.",
+        "8. Captain – A bold and adventurous name, perfect for a leader.",
+        "9. Pip – A tiny, cute name for a small or endearing creature.",
+        "10. Zeus – A powerful, mythological name for a majestic and commanding pet.",
+      ];
 
-      // Check if the response was successful
-      if (!response.ok) {
-        // If not, throw an error with the message from the API
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Something went wrong during name generation.');
-      }
+      // Simulate a small delay to mimic API call latency
+      await new Promise(resolve => setTimeout(resolve, 1000)); // 1 second delay
 
-      // Parse the JSON response
-      const data = await response.json();
-      // Update the names state with the generated names
-      setNames(data.names);
+      // Update the names state with the static names
+      setNames(staticNames);
+
     } catch (err) {
-      console.error('Failed to generate names:', err);
-      // Set the error message to display to the user
-      setError(err.message || 'An unexpected error occurred. Please try again.');
+      // This catch block is less likely to be hit with static data, but good practice.
+      console.error('Failed to generate names (static error):', err);
+      setError('An unexpected error occurred while generating names.');
     } finally {
       setLoading(false); // Hide loading spinner
     }
-  }, [petType, description, nameStyle]); // Dependencies for useCallback
+  }, []); // Dependencies for useCallback - no longer depends on petType, description, nameStyle as data is static
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-100 to-blue-100 flex items-center justify-center p-4">

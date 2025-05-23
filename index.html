@@ -1,172 +1,206 @@
-// pages/index.js
-import { useState, useCallback } from 'react';
-
-export default function Home() {
-  // State variables to store form input values
-  const [petType, setPetType] = useState('');
-  const [description, setDescription] = useState('');
-  const [nameStyle, setNameStyle] = useState('Cute'); // Default style
-  // State for loading indicator
-  const [loading, setLoading] = useState(false);
-  // State to store the generated names
-  const [names, setNames] = useState([]);
-  // State for error messages (less likely with static data, but kept for potential future use)
-  const [error, setError] = useState(null);
-
-  /**
-   * Handles the form submission.
-   * Prevents default form behavior, sets loading state, and updates names with static data.
-   */
-  const handleSubmit = useCallback(async (e) => {
-    e.preventDefault(); // Prevent default form submission
-    setLoading(true); // Show loading spinner
-    setNames([]); // Clear previous names
-    setError(null); // Clear previous errors
-
-    try {
-      // --- STATIC NAMES FOR TESTING (Moved from API route) ---
-      // This array will be returned directly by the frontend for GitHub Pages compatibility.
-      const staticNames = [
-        "1. Luna – A classic, gentle name perfect for a calm companion.",
-        "2. Sparky – A playful name for an energetic and mischievous pet.",
-        "3. Athena – A strong, wise name, great for a noble and intelligent animal.",
-        "4. Biscuit – A sweet, comforting name for a cuddly and lovable friend.",
-        "5. Rocket – Ideal for a fast, adventurous, or high-energy pet.",
-        "6. Shadow – A mysterious and cool name, often fitting for dark-furred pets.",
-        "7. Willow – A graceful, nature-inspired name for a serene and elegant animal.",
-        "8. Captain – A bold and adventurous name, perfect for a leader.",
-        "9. Pip – A tiny, cute name for a small or endearing creature.",
-        "10. Zeus – A powerful, mythological name for a majestic and commanding pet.",
-      ];
-
-      // Simulate a small delay to mimic API call latency
-      await new Promise(resolve => setTimeout(resolve, 1000)); // 1 second delay
-
-      // Update the names state with the static names
-      setNames(staticNames);
-
-    } catch (err) {
-      // This catch block is less likely to be hit with static data, but good practice.
-      console.error('Failed to generate names (static error):', err);
-      setError('An unexpected error occurred while generating names.');
-    } finally {
-      setLoading(false); // Hide loading spinner
-    }
-  }, []); // Dependencies for useCallback - no longer depends on petType, description, nameStyle as data is static
-
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-100 to-blue-100 flex items-center justify-center p-4">
-      <div className="bg-white p-8 md:p-10 rounded-3xl shadow-2xl w-full max-w-2xl border border-gray-200">
-        {/* Headline */}
-        <h1 className="text-4xl md:text-5xl font-extrabold text-center text-gray-900 mb-4">
-          AI Pet Naming Tool
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Pet Naming Tool</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styles for Inter font and general body styling */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc; /* Light blue-gray background */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        /* Basic styling for buttons and inputs */
+        .btn {
+            @apply px-6 py-3 rounded-xl font-semibold transition-all duration-300 ease-in-out;
+        }
+        .btn-primary {
+            @apply bg-indigo-600 text-white hover:bg-indigo-700 focus:outline-none focus:ring-4 focus:ring-indigo-500 focus:ring-opacity-50;
+        }
+        .input-field {
+            @apply mt-1 block w-full px-4 py-3 border border-gray-300 rounded-xl shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-lg transition-colors duration-200;
+        }
+        .textarea-field {
+            @apply mt-1 block w-full px-4 py-3 border border-gray-300 rounded-xl shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-lg resize-y transition-colors duration-200;
+        }
+        .select-field {
+            @apply mt-1 block w-full px-4 py-3 border border-gray-300 rounded-xl shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-lg appearance-none bg-white pr-8 transition-colors duration-200;
+        }
+        .disabled-btn {
+            @apply opacity-60 cursor-not-allowed;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+    <div class="bg-white p-8 md:p-10 rounded-3xl shadow-2xl w-full max-w-2xl border border-gray-200">
+        <h1 class="text-4xl md:text-5xl font-extrabold text-center text-gray-900 mb-4">
+            AI Pet Naming Tool
         </h1>
-        {/* Subheading */}
-        <p className="text-lg md:text-xl text-center text-gray-600 mb-8">
-          Describe your pet and get 10 creative name ideas
+        <p class="text-lg md:text-xl text-center text-gray-600 mb-8">
+            Describe your pet and get 10 creative name ideas
         </p>
 
-        {/* Pet Naming Form */}
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Pet Type Input */}
-          <div>
-            <label htmlFor="petType" className="block text-lg font-medium text-gray-700 mb-2">
-              Pet Type (e.g., Dog, Cat, Hamster)
-            </label>
-            <input
-              type="text"
-              id="petType"
-              value={petType}
-              onChange={(e) => setPetType(e.target.value)}
-              placeholder="e.g., Golden Retriever, Siamese Cat"
-              required
-              className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-xl shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-lg transition-colors duration-200"
-            />
-          </div>
+        <form id="petNamingForm" class="space-y-6">
+            <div>
+                <label for="petType" class="block text-lg font-medium text-gray-700 mb-2">
+                    Pet Type (e.g., Dog, Cat, Hamster)
+                </label>
+                <input
+                    type="text"
+                    id="petType"
+                    placeholder="e.g., Golden Retriever, Siamese Cat"
+                    required
+                    class="input-field"
+                />
+            </div>
 
-          {/* Pet Description Textarea */}
-          <div>
-            <label htmlFor="description" className="block text-lg font-medium text-gray-700 mb-2">
-              Pet Description (e.g., playful, fluffy, loves to cuddle)
-            </label>
-            <textarea
-              id="description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              rows="4"
-              placeholder="e.g., A fluffy, energetic puppy with a wagging tail and bright eyes."
-              required
-              className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-xl shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-lg resize-y transition-colors duration-200"
-            ></textarea>
-          </div>
+            <div>
+                <label for="description" class="block text-lg font-medium text-gray-700 mb-2">
+                    Pet Description (e.g., playful, fluffy, loves to cuddle)
+                </label>
+                <textarea
+                    id="description"
+                    rows="4"
+                    placeholder="e.g., A fluffy, energetic puppy with a wagging tail and bright eyes."
+                    required
+                    class="textarea-field"
+                ></textarea>
+            </div>
 
-          {/* Preferred Name Style Dropdown */}
-          <div>
-            <label htmlFor="nameStyle" className="block text-lg font-medium text-gray-700 mb-2">
-              Preferred Name Style
-            </label>
-            <select
-              id="nameStyle"
-              value={nameStyle}
-              onChange={(e) => setNameStyle(e.target.value)}
-              className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-xl shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-lg appearance-none bg-white pr-8 transition-colors duration-200"
+            <div>
+                <label for="nameStyle" class="block text-lg font-medium text-gray-700 mb-2">
+                    Preferred Name Style
+                </label>
+                <select
+                    id="nameStyle"
+                    class="select-field"
+                >
+                    <option value="Cute">Cute</option>
+                    <option value="Funny">Funny</option>
+                    <option value="Mythological">Mythological</option>
+                    <option value="Classic">Classic</option>
+                    <option value="Unique">Unique</option>
+                </select>
+            </div>
+
+            <button
+                type="submit"
+                id="generateBtn"
+                class="w-full flex justify-center py-3 px-6 border border-transparent rounded-xl shadow-sm text-lg font-semibold text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-300 ease-in-out"
             >
-              <option value="Cute">Cute</option>
-              <option value="Funny">Funny</option>
-              <option value="Mythological">Mythological</option>
-              <option value="Classic">Classic</option>
-              <option value="Unique">Unique</option>
-            </select>
-          </div>
-
-          {/* Submit Button */}
-          <button
-            type="submit"
-            disabled={loading} // Disable button while loading
-            className="w-full flex justify-center py-3 px-6 border border-transparent rounded-xl shadow-sm text-lg font-semibold text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-300 ease-in-out disabled:opacity-60 disabled:cursor-not-allowed"
-          >
-            {loading ? (
-              <svg className="animate-spin h-6 w-6 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
-            ) : (
-              'Generate Names'
-            )}
-          </button>
+                <span id="buttonText">Generate Names</span>
+                <svg id="loadingSpinner" class="animate-spin h-6 w-6 text-white hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+            </button>
         </form>
 
-        {/* Error Display */}
-        {error && (
-          <div className="mt-8 p-4 bg-red-100 border border-red-400 text-red-700 rounded-xl text-center">
-            <p className="font-medium">Error:</p>
-            <p>{error}</p>
-          </div>
-        )}
+        <div id="errorDisplay" class="mt-8 p-4 bg-red-100 border border-red-400 text-red-700 rounded-xl text-center hidden">
+            <p class="font-medium">Error:</p>
+            <p id="errorMessage"></p>
+        </div>
 
-        {/* Generated Names List */}
-        {names.length > 0 && (
-          <div className="mt-10 pt-8 border-t border-gray-200">
-            <h2 className="text-3xl font-bold text-center text-gray-800 mb-6">
-              Your Pet Name Ideas
+        <div id="namesResult" class="mt-10 pt-8 border-t border-gray-200 hidden">
+            <h2 class="text-3xl font-bold text-center text-gray-800 mb-6">
+                Your Pet Name Ideas
             </h2>
-            <ul className="space-y-4">
-              {names.map((name, index) => (
-                <li key={index} className="bg-gray-50 p-5 rounded-xl shadow-sm border border-gray-100 flex items-start space-x-3">
-                  <span className="text-indigo-600 font-bold text-xl">{index + 1}.</span>
-                  <p className="text-gray-800 text-lg flex-1">
-                    <strong className="text-indigo-700">{name.split(' – ')[0]}</strong>
-                    {/* Check if explanation exists before rendering */}
-                    {name.includes(' – ') && (
-                      <span className="text-gray-600"> – {name.split(' – ')[1]}</span>
-                    )}
-                  </p>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-      </div>
+            <ul id="namesList" class="space-y-4">
+                </ul>
+        </div>
     </div>
-  );
-}
+
+    <script>
+        // Get DOM elements
+        const petNamingForm = document.getElementById('petNamingForm');
+        const petTypeInput = document.getElementById('petType');
+        const descriptionTextarea = document.getElementById('description');
+        const nameStyleSelect = document.getElementById('nameStyle');
+        const generateBtn = document.getElementById('generateBtn');
+        const buttonText = document.getElementById('buttonText');
+        const loadingSpinner = document.getElementById('loadingSpinner');
+        const errorDisplay = document.getElementById('errorDisplay');
+        const errorMessage = document.getElementById('errorMessage');
+        const namesResult = document.getElementById('namesResult');
+        const namesList = document.getElementById('namesList');
+
+        /**
+         * Handles the form submission.
+         * Simulates an API call and displays static pet names.
+         */
+        petNamingForm.addEventListener('submit', async (e) => {
+            e.preventDefault(); // Prevent default form submission
+
+            // Hide previous results and errors
+            namesResult.classList.add('hidden');
+            errorDisplay.classList.add('hidden');
+            namesList.innerHTML = ''; // Clear previous names
+
+            // Show loading spinner and disable button
+            buttonText.classList.add('hidden');
+            loadingSpinner.classList.remove('hidden');
+            generateBtn.disabled = true;
+            generateBtn.classList.add('disabled-btn');
+
+            try {
+                // --- STATIC NAMES FOR TESTING ---
+                const staticNames = [
+                    "1. Luna – A classic, gentle name perfect for a calm companion.",
+                    "2. Sparky – A playful name for an energetic and mischievous pet.",
+                    "3. Athena – A strong, wise name, great for a noble and intelligent animal.",
+                    "4. Biscuit – A sweet, comforting name for a cuddly and lovable friend.",
+                    "5. Rocket – Ideal for a fast, adventurous, or high-energy pet.",
+                    "6. Shadow – A mysterious and cool name, often fitting for dark-furred pets.",
+                    "7. Willow – A graceful, nature-inspired name for a serene and elegant animal.",
+                    "8. Captain – A bold and adventurous name, perfect for a leader.",
+                    "9. Pip – A tiny, cute name for a small or endearing creature.",
+                    "10. Zeus – A powerful, mythological name for a majestic and commanding pet.",
+                ];
+
+                // Simulate a small delay to mimic API call latency
+                await new Promise(resolve => setTimeout(resolve, 1500)); // 1.5 second delay
+
+                // Display the names
+                staticNames.forEach((name, index) => {
+                    const listItem = document.createElement('li');
+                    listItem.className = 'bg-gray-50 p-5 rounded-xl shadow-sm border border-gray-100 flex items-start space-x-3';
+
+                    const nameParts = name.split(' – ');
+                    const nameStrong = nameParts[0].substring(nameParts[0].indexOf('.') + 2); // Get name after number and dot
+                    const explanation = nameParts.length > 1 ? ` – ${nameParts[1]}` : '';
+
+                    listItem.innerHTML = `
+                        <span class="text-indigo-600 font-bold text-xl">${index + 1}.</span>
+                        <p class="text-gray-800 text-lg flex-1">
+                            <strong class="text-indigo-700">${nameStrong}</strong>
+                            <span class="text-gray-600">${explanation}</span>
+                        </p>
+                    `;
+                    namesList.appendChild(listItem);
+                });
+
+                namesResult.classList.remove('hidden'); // Show the results section
+
+            } catch (err) {
+                // In this static version, errors are unlikely unless there's a JS parsing issue.
+                console.error('Error generating names:', err);
+                errorMessage.textContent = 'An unexpected error occurred. Please try again.';
+                errorDisplay.classList.remove('hidden');
+            } finally {
+                // Hide loading spinner and enable button
+                buttonText.classList.remove('hidden');
+                loadingSpinner.classList.add('hidden');
+                generateBtn.disabled = false;
+                generateBtn.classList.remove('disabled-btn');
+            }
+        });
+    </script>
+</body>
+</html>
